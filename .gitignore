@@ -1,0 +1,36 @@
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/terraform.tfvars
+**/kubeconfig
+crash.log
+crash.*.log
+
+# Go
+app/ecom-api
+app/*.exe
+app/coverage.out
+
+# Python / Locust
+loadtest/.venv/
+__pycache__/
+*.pyc
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Local notes / screenshots staging area (commit the final set into docs/images/)
+*.local.md
+
+# Local-only orchestration files — must NOT end up in the public repo.
+setup-git-history.ps1
+run.bat
+TEAMMATE-INSTRUCTIONS.md
+make-screenshots.bat
+scripts/make-screenshots.ps1
