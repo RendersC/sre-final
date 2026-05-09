@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ecom
+  labels:
+    app.kubernetes.io/part-of: sre-final
+    # Allows kube-prometheus-stack sidecar to pick up dashboards from here too.
+    monitoring: enabled
