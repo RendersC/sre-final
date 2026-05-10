@@ -1,0 +1,79 @@
+﻿apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ecom-api-slo
+  namespace: ecom
+  labels:
+    release: kps
+    app.kubernetes.io/part-of: sre-final
+spec:
+  groups:
+    - name: ecom-api.slo
+      interval: 30s
+      rules:
+        # ----- Recording rules: SLI shortcuts used by Grafana & alerts. -----
+        - record: ecom_api:request_rate:5m
+          expr: |
+            sum by (route) (rate(http_requests_total{route!=""}[5m]))
+
+        - record: ecom_api:error_rate:5m
+          expr: |
+            sum(rate(http_requests_total{status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total[5m]))
+
+        - record: ecom_api:latency_p95:5m
+          expr: |
+            histogram_quantile(
+              0.95,
+              sum by (le, route) (rate(http_request_duration_seconds_bucket[5m]))
+            )
+
+        # ----- Alerts -----
+        - alert: EcomApiHighErrorRate
+          expr: ecom_api:error_rate:5m > 0.05
+          for: 2m
+          labels:
+            severity: critical
+            service: ecom-api
+          annotations:
+            summary: "ecom-api error rate above 5%"
+            description: "5xx error ratio is {{ printf \"%.2f\" $value }} over the last 5m (threshold 0.05). Burning SLO error budget."
+            runbook_url: "https://github.com/RendersC/sre-final/blob/main/docs/runbook.md#high-error-rate"
+
+        - alert: EcomApiHighLatencyP95
+          expr: ecom_api:latency_p95:5m > 0.5
+          for: 5m
+          labels:
+            severity: warning
+            service: ecom-api
+          annotations:
+            summary: "ecom-api p95 latency > 500ms"
+            description: "p95 latency is {{ printf \"%.3f\" $value }}s over 5m. SLO target is <300ms."
+            runbook_url: "https://github.com/RendersC/sre-final/blob/main/docs/runbook.md#high-latency"
+
+        - alert: EcomApiPodNotReady
+          expr: |
+            sum by (namespace) (
+              kube_pod_status_ready{condition="true", namespace="ecom"}
+            ) < 1
+          for: 2m
+          labels:
+            severity: critical
+            service: ecom-api
+          annotations:
+            summary: "ecom-api has no Ready pods"
+            description: "No Ready pods in namespace ecom for 2m. Service is down."
+
+        - alert: EcomApiHighCpu
+          expr: |
+            avg by (pod) (
+              rate(container_cpu_usage_seconds_total{namespace="ecom", container="ecom-api"}[3m])
+            ) > 0.20
+          for: 5m
+          labels:
+            severity: warning
+            service: ecom-api
+          annotations:
+            summary: "ecom-api pods sustained high CPU"
+            description: "Avg per-pod CPU usage > 200m for 5m. Verify HPA is scaling."
