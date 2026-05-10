@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ecom-api
+  namespace: ecom
+  labels:
+    release: kps           # picked up by kube-prometheus-stack ("kps" release name)
+    app.kubernetes.io/part-of: sre-final
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ecom-api
+  namespaceSelector:
+    matchNames:
+      - ecom
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
