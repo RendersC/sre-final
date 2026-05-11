@@ -1,0 +1,38 @@
+# Apply with: kubectl apply -f monitoring/alertmanager/alertmanager-config.yaml
+# The kube-prometheus-stack chart watches AlertmanagerConfig resources labelled
+# release=kps and merges them into the Alertmanager configuration.
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: ecom-api-routes
+  namespace: monitoring
+  labels:
+    release: kps
+spec:
+  route:
+    receiver: 'default-webhook'
+    groupBy: ['alertname', 'service', 'severity']
+    groupWait: 30s
+    groupInterval: 5m
+    repeatInterval: 4h
+    routes:
+      - matchers:
+          - name: severity
+            value: critical
+        receiver: 'critical-webhook'
+        continue: false
+      - matchers:
+          - name: severity
+            value: warning
+        receiver: 'default-webhook'
+
+  receivers:
+    - name: 'default-webhook'
+      webhookConfigs:
+        # Replace this URL with Slack/PagerDuty/Discord webhook for real deployments.
+        - url: 'http://example.local/alerts/default'
+          sendResolved: true
+    - name: 'critical-webhook'
+      webhookConfigs:
+        - url: 'http://example.local/alerts/critical'
+          sendResolved: true
