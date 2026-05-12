@@ -1,0 +1,15 @@
+# Loads the SRE dashboard into Grafana via the kube-prometheus-stack sidecar.
+# The sidecar watches for ConfigMaps with label `grafana_dashboard=1`.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ecom-api-sre-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  ecom-api-sre-dashboard.json: |
+    # NOTE: When applying, replace the contents below with the JSON from
+    # ecom-api-sre-dashboard.json. Kept short here for git readability.
+    # Use the helper script:
+    #   ./scripts/install-dashboard.sh
