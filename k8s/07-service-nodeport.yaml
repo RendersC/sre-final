@@ -1,0 +1,20 @@
+# Optional: exposes ecom-api on the Kind host at http://localhost:30081
+# (matches an extra_port_mapping you can add in terraform/main.tf if you want
+# to demo without `kubectl port-forward`).
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecom-api-nodeport
+  namespace: ecom
+  labels:
+    app.kubernetes.io/name: ecom-api
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: ecom-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      nodePort: 30081
+      protocol: TCP
