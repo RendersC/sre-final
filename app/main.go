@@ -1,3 +1,4 @@
+﻿// SRE Capstone — ecom-api service. See REPORT.md for details.
 package main
 
 import (
