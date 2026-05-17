@@ -5,7 +5,6 @@ class: invert
 paginate: true
 size: 16:9
 header: 'SRE Capstone — Production Readiness Review · SE2408'
-footer: 'Adildabek Nurassyl · Artem Safaryan'
 ---
 
 <!-- _class: invert lead -->
